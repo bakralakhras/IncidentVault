@@ -1,5 +1,6 @@
-from db import engine
-from models import Base
-Base.metadata.create_all(bind=engine)
+# db/create_tables.py
+from .db import engine, init_db
 
-print("Tables Created Successfully,")
+if __name__ == "__main__":
+    init_db()
+    print("Tables created")

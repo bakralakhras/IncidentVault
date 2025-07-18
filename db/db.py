@@ -1,13 +1,21 @@
-#create tables
+import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker,declarative_base
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = "sqlite:///./incidentvault.db"
+load_dotenv()
 
-engine = create_engine(DATABASE_URL)
-SessionLocal= sessionmaker(autocommit=False, autoflush=False,bind= engine)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-Base= declarative_base()
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+from .models import Base
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
 def get_db():
     db = SessionLocal()
     try:

@@ -1,27 +1,5 @@
-# Python cache
 **/__pycache__/
-*.py[cod]
-*.pyc
-
-# Terraform
 **/.terraform/*
-!.terraform/plugins/
-
-# Database-related (if needed)
-**/db/migrations/
-**/db/*.sqlite3
-
-# IDE & Editor
-.vscode/
-.idea/
-*.swp
-
-# Virtual Environment
-venv/
+incidentvault.db
 .env/
-.venv/
 incidentvault/
-
-# System files
-.DS_Store
-Thumbs.db

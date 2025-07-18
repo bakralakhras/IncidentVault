@@ -1,38 +1,61 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from db.db import SessionLocal
-from db.models import Report
 from typing import List
-from schemas import ReportOut
-from schemas import ReportCreate
-from fastapi import HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from db.db import get_db
+from db.models import Report as ReportModel
+from schemas import ReportCreate, ReportOut
+
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@router.post("/report")
-def create_report(payload:ReportCreate, db: Session = Depends(get_db)):
-    new_report=Report(**payload.dict())
-    db.add(new_report)
+@router.post(
+    "/report",
+    response_model=ReportOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new incident report",
+)
+def create_report(
+    report_in: ReportCreate,
+    db: Session = Depends(get_db),
+):
+    # Optional: prevent duplicates
+    if db.query(ReportModel).filter_by(title=report_in.title).first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A report with that title already exists."
+        )
+
+    report = ReportModel(**report_in.model_dump())
+    db.add(report)
     db.commit()
-    db.refresh(new_report)
-    return new_report
-@router.get("/report", response_model=List[ReportOut])
+    db.refresh(report)
+    return report
+
+
+@router.get(
+    "/report",
+    response_model=List[ReportOut],
+    summary="Retrieve all incident reports",
+)
 def read_reports(db: Session = Depends(get_db)):
-    reports= db.query(Report).all()
-    return reports
-    
-@router.delete("/report/{id}")
+    return db.query(ReportModel).all()
+
+
+@router.delete(
+    "/report/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete an incident report by ID",
+)
 def delete_report(id: int, db: Session = Depends(get_db)):
-    entry= db.query(Report).get(id)
-    if entry is None:
-        raise HTTPException(status_code=404, detail="Report not found.")
-    db.delete(entry)
+    # Use Session.get() instead of the deprecated query.get()
+    report = db.get(ReportModel, id)
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Report with id={id} not found."
+        )
+    db.delete(report)
     db.commit()
     return {"ok": True, "message": f"Report {id} deleted"}
-
