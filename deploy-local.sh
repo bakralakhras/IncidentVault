@@ -29,8 +29,11 @@ if [ -n "$PID" ]; then
   kill -9 $PID
   echo "Killed process $PID"
 else
-  echo " No process found on port 8000"
+  echo "No process found on port 8000"
 fi
 
-echo "🔌 Port forwarding 8000 -> service/${RELEASE_NAME}"
+echo "Waiting for pod to be ready..."
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=${RELEASE_NAME} --timeout=60s
+
+echo "Port forwarding 8000 -> service/${RELEASE_NAME}"
 kubectl port-forward svc/${RELEASE_NAME} 8000:8000
