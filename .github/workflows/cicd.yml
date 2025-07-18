@@ -27,8 +27,8 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest
-
+          export PYTHONPATH="${{ github.workspace }}"
+          pytest tests/
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
