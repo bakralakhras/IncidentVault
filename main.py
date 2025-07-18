@@ -8,15 +8,12 @@ app = FastAPI()
 async def root():
     return {"message": "first run"}
 
-# Include routers
 app.include_router(health.router)
 app.include_router(report.router)
 
-# Use named instrumentator instance
 instrumentator = Instrumentator()
 instrumentator.instrument(app)
 instrumentator.expose(app)
 
-# DEBUG: Print all registered routes
 for route in app.routes:
-    print(f"🚀 {route.path} -> {route.name}")
+    print(f"{route.path} -> {route.name}")
