@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-build-scan:
-    name: Test, Build & Scan
+  test-build-push:
+    name: Test, Build, Scan & Push
     runs-on: ubuntu-latest
 
     steps:
@@ -25,21 +25,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+
       - name: Run Tests
-        run: |
-          export PYTHONPATH="${{ github.workspace }}"
-          pytest tests/
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        run: pytest tests/
 
-      - name: Build Docker Image with SHA tag
-        run: |
-          docker build -f docker/Dockerfile -t incidentvault:${{ github.sha }} .
+      - name: Extract Git SHA
+        id: vars
+        run: echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Install Trivy and scan the image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: bakrferas/incidentvault:${{ steps.vars.outputs.sha }}
+
+      - name: Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: incidentvault:${{ github.sha }}
+          image-ref: bakrferas/incidentvault:${{ steps.vars.outputs.sha }}
           format: table
-          exit-code: 0  
+          exit-code: 0
