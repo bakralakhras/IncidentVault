@@ -1,10 +1,13 @@
 [flake8]
+# Match Black’s defaults
 max-line-length = 88
 extend-ignore = E203, W503
+
+# Skip migrations, virtual-envs, caches, etc.
 exclude =
     alembic/versions/,
-    __pycache__,
     .git,
+    __pycache__,
     env/,
     venv/,
     build/,
