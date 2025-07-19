@@ -26,6 +26,7 @@ def add_error_route(monkeypatch):
     @app.get("/error")
     def error():
         raise RuntimeError("ouch")
+
     yield
 
 

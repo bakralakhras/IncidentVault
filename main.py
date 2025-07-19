@@ -8,8 +8,9 @@ from routes.health import router as health_router
 from routes.report import router as report_router
 
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] "
-                    "%(name)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] " "%(name)s: %(message)s"
+)
 logger = logging.getLogger("incidentvault")
 
 app = FastAPI(title="IncidentVault", version="1.0.0")
@@ -25,13 +26,15 @@ async def catch_exceptions_middleware(request: Request, call_next):
         raise
     except Exception:
         logger.exception(f"Unhandled error on {request.url}")
-        return JSONResponse(status_code=500, content={
-            "detail": "Internal server error"})
+        return JSONResponse(
+            status_code=500, content={"detail": "Internal server error"}
+        )
 
 
 @app.get("/")
 async def root():
     return {"message": "first run"}
+
 
 app.include_router(health_router)
 app.include_router(report_router)
@@ -53,6 +56,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def general_exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled error on {request.url}")
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
 
 instrumentator = Instrumentator()
 instrumentator.instrument(app)

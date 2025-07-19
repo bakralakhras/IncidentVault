@@ -8,12 +8,8 @@ from db.models import Base
 from main import app
 
 TEST_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(
-    TEST_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine
-)
+engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
@@ -39,10 +35,7 @@ def clear_db():
 
 
 def test_create_report_success():
-    payload = {
-        "title": "Test Report",
-        "description": "This is a test report"
-    }
+    payload = {"title": "Test Report", "description": "This is a test report"}
     resp = client.post("/report", json=payload)
     assert resp.status_code == 201
     data = resp.json()
@@ -107,6 +100,7 @@ def add_error_route(monkeypatch):
     @app.get("/error")
     def error():
         raise RuntimeError("ouch")
+
     yield
 
 

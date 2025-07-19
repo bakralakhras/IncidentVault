@@ -24,7 +24,7 @@ def create_report(
     if db.query(ReportModel).filter_by(title=report_in.title).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A report with that title already exists."
+            detail="A report with that title already exists.",
         )
 
     report = ReportModel(**report_in.model_dump())
@@ -54,7 +54,7 @@ def delete_report(id: int, db: Session = Depends(get_db)):
     if not report:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Report with id={id} not found."
+            detail=f"Report with id={id} not found.",
         )
     db.delete(report)
     db.commit()
