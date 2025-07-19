@@ -1,6 +1,3 @@
-# tests/test_report.py
-
-import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -21,12 +18,14 @@ TestingSessionLocal = sessionmaker(
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
+
 def override_get_db():
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
+
 
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
@@ -105,11 +104,11 @@ def test_404_handler():
 
 @pytest.fixture(autouse=True)
 def add_error_route(monkeypatch):
-    from fastapi import FastAPI
     @app.get("/error")
     def error():
         raise RuntimeError("ouch")
     yield
+
 
 def test_general_exception_handler():
     resp = client.get("/error")

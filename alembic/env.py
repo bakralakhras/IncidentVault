@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+from db.models import Base
 
 # 1) load .env so os.getenv("DATABASE_URL") works
 load_dotenv()
@@ -17,7 +17,6 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # 4) Import your Base metadata
-from db.models import Base
 target_metadata = Base.metadata
 
 
